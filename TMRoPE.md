@@ -2,6 +2,20 @@
 
 ---
 
+## TMRoPE 实现流程图
+
+```mermaid
+flowchart LR
+    A[多模态原始输入<br/>（文本、图片、音频、视频）] --> B[特征预处理<br/>（抽帧、归一化、梅尔谱等）]
+    B --> C[各模态编码器<br/>（视觉、音频、文本编码）]
+    C --> D[特征拼接<br/>（按时序/空间对齐）]
+    D --> E[TMRoPE位置索引生成<br/>get_rope_index]
+    E --> F[多模态RoPE编码<br/>apply_multimodal_rotary_pos_emb]
+    F --> G[Transformer融合<br/>（注意力机制对齐）]
+    G --> H[统一语义空间输出<br/>（文本/语音/多模态响应）]
+``` 
+---
+
 ## 一、时间对齐（TMRoPE：Time-aligned Multimodal Rotary Position Embedding）
 
 ### 核心思想
@@ -133,4 +147,6 @@ self.model = Qwen2_5OmniThinkerTextModel._from_config(...)
 3. **特征融合**：所有模态特征拼接后送入统一 Transformer，利用注意力机制实现隐式对齐和深度融合。
 4. **数据预处理**：保证输入特征的时空同步和格式统一，为后续对齐和融合打下基础。
 
-如需进一步查看某一部分的详细代码或流程图，请告知！ 
+如需进一步查看某一部分的详细代码或流程图，请告知！
+
+
