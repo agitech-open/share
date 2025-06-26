@@ -104,15 +104,46 @@ Qwen2.5-Omni 之所以能做到输入音视频后"很快说出语音"，其秘�
 
 ### 总结：一个高效的实时语音流水线
 
-综上所述，整个实时交互过程如下面的动图所示：
+**实时语音流水线流程图：**
 
-**输入 -> [Thinker] -> token1 -> [Talker] -> speech_token1 -> [Token2Wav] -> audio_chunk1 -> 输出**
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`-> token2 -> [Talker] -> speech_token2 -> [Token2Wav] -> audio_chunk2 -> 输出`
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`-> token3 -> [Talker] -> speech_token3 -> [Token2Wav] -> audio_chunk3 -> 输出`
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`...`
+```mermaid
+graph TD
+    A[输入] --> B[Thinker]
+    B --> C1[token1]
+    C1 --> D1[Talker]
+    D1 --> E1[speech_token1]
+    E1 --> F1[Token2Wav]
+    F1 --> G1[audio_chunk1]
+    G1 --> H1[输出]
+    B --> C2[token2]
+    C2 --> D2[Talker]
+    D2 --> E2[speech_token2]
+    E2 --> F2[Token2Wav]
+    F2 --> G2[audio_chunk2]
+    G2 --> H2[输出]
+    B --> C3[token3]
+    C3 --> D3[Talker]
+    D3 --> E3[speech_token3]
+    E3 --> F3[Token2Wav]
+    F3 --> G3[audio_chunk3]
+    G3 --> H3[输出]
+    %% ...
+```
 
-1.  **无需等待**：您无需等待模型生成完整的文本回复。
-2.  **并行处理**：在 Thinker 生成后续文本的同时，Talker 和 Token2Wav 已经在处理和合成前面部分的语音。
-3.  **流式音频合成**：最关键的是，`Token2Wav` 模块通过 `sample_chunk` 和流式声码器，将语音合成任务分解为微小的块，从而实现了极低延迟的音频流输出。
+或用更直观的分步说明：
+
+1. **输入**
+2. **[Thinker]** 生成 token1
+    - 传递给 [Talker]，生成 speech_token1
+    - 传递给 [Token2Wav]，生成 audio_chunk1
+    - 输出 audio_chunk1
+3. **[Thinker]** 生成 token2
+    - 传递给 [Talker]，生成 speech_token2
+    - 传递给 [Token2Wav]，生成 audio_chunk2
+    - 输出 audio_chunk2
+4. **[Thinker]** 生成 token3 ...
+    - 如上流程继续
+
+这种流水线式的流处理方式，实现了"边思考、边说话、边发声"，极大提升了响应速度和交互体验。
 
 这就是 Qwen2.5-Omni 在代码层面实现"完全实时交互"的精髓所在。它不是一个简单的模型调用，而是一个精心设计的、端到端的流式处理系统。 
